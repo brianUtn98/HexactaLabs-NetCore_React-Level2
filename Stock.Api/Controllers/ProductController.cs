@@ -8,6 +8,7 @@ using Stock.Api.DTOs;
 using Stock.Api.Extensions;
 using Stock.AppService.Services;
 using Stock.Model.Entities;
+using Stock.Model.Exceptions;
 
 namespace Stock.Api.Controllers
 {
@@ -20,16 +21,18 @@ namespace Stock.Api.Controllers
     public class ProductController : ControllerBase
     {
         private ProductService service;
+        private ProductTypeService productTypeService; 
         private readonly IMapper mapper;
         /// <summary>
         /// Initializes a new instance of the <see cref="ProductController"/> class.
         /// </summary>
         /// <param name="service">Product service.</param>
         /// <param name="mapper">Mapper configurator.</param>
-        public ProductController(ProductService service,IMapper mapper)
+        public ProductController(ProductService service,IMapper mapper,ProductTypeService productTypeService)
         {
             this.service = service ?? throw new ArgumentNullException(nameof(service));
             this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            this.productTypeService = productTypeService ?? throw new ArgumentNullException(nameof(productTypeService));
         }
 
         /// <summary>
@@ -45,13 +48,23 @@ namespace Stock.Api.Controllers
             try
             {
                 var product = mapper.Map<Product>(value);
+                if(!string.IsNullOrWhiteSpace(value.ProductTypeId))
+                {
+                    var productType = this.productTypeService.Get(value.ProductTypeId);
+                    if(productType == null)
+                    {
+                        return BadRequest(new { Success = false, Message = "Product type doesn't exists"});
+                    }
+                    product.ProductType = productType;
+                    value.ProductTypeDesc = productType.Description; 
+                }
                 service.Create(product);
                 value.Id = product.Id;
-                return Created(Url.Action("Get", new { Id = value.Id }), value);
+                return Ok(new { Success = true, Message = "", data = value });
             }
-            catch
+            catch(ModelException ex)
             {
-                return BadRequest(new { Success = false, Message = "The name is already in use" });
+                return BadRequest(new { Success = false, Message = "Error ocurred: "+ex.Message });
             }
         }
 

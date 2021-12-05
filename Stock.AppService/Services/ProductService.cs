@@ -22,27 +22,12 @@ namespace Stock.AppService.Services
 
        }
 
-       /// <summary>
-       /// Creates a product.
-       /// </summary>
-       /// <param name="entity">Product information.</param>
-       ///<returns></returns>
-       ///<exception cref="Exception"></exception>
-       public new Product Create(Product entity)
-       {
-           //if(NombreUnico(entity.Name))
-          // {
-               return base.Create(entity);
-           //}
-
-          // throw new System.Exception("The name is already in use");
-       }
     
         /// <summary>
         /// Checks if the product name is unique or not.
         /// </summary>
         /// <param name="name">Product name to check.</param>
-        /// <returns></returns>
+        /// <r></r
         private bool NombreUnico(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
